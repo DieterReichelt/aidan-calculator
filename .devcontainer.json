@@ -1,0 +1,14 @@
+{
+  "name": "Aidan Calculator Dev Env",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+  "forwardPorts": [3000],
+  "postCreateCommand": "npm install",
+  "postStartCommand": "npm run dev -- --host",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint"
+      ]
+    }
+  }
+}

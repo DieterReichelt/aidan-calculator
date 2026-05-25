@@ -276,6 +276,10 @@
       <option value="geometry">📐 Geometry Solver</option>
       <option value="factors">🌳 Prime Factor Tree</option>
       <option value="stats">📊 Stats & Data Visualizer</option>
+      <option value="matrix">🔡 Matrix Calculator</option>
+      <option value="finance">💰 Financial Math</option>
+      <option value="bytes">💾 Byte Converter</option>
+      <option value="subnet">🌐 Subnet Calculator</option>
     </select>
   </div>
 
@@ -712,16 +716,314 @@
       <div class="lesson-box" id="stats-lesson"></div>
     </div>
 
+    <!-- MATRIX PANEL -->
+    <div class="panel" id="panel-matrix">
+      <div style="background: rgba(0,0,0,0.05); padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+        <div style="font-size: 0.7rem; color: #888; text-transform: uppercase; margin-bottom: 8px;">2x2 Matrix Determinant</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; background: #fff; border-left: 3px solid #333; border-right: 3px solid #333; border-radius: 8px;">
+          <input class="ld-input" type="number" id="mat-a" placeholder="a" onfocus="setActiveMatrix(this)" oninput="calcMatrix()" style="color: #fff;">
+          <input class="ld-input" type="number" id="mat-b" placeholder="b" onfocus="setActiveMatrix(this)" oninput="calcMatrix()" style="color: #fff;">
+          <input class="ld-input" type="number" id="mat-c" placeholder="c" onfocus="setActiveMatrix(this)" oninput="calcMatrix()" style="color: #fff;">
+          <input class="ld-input" type="number" id="mat-d" placeholder="d" onfocus="setActiveMatrix(this)" oninput="calcMatrix()" style="color: #fff;">
+        </div>
+      </div>
+      <div class="keypad" style="margin-top: 15px;">
+        <button class="btn-num" onclick="keypadTypeMatrix('7')">7</button><button class="btn-num" onclick="keypadTypeMatrix('8')">8</button><button class="btn-num" onclick="keypadTypeMatrix('9')">9</button>
+        <button class="btn-num" onclick="keypadTypeMatrix('4')">4</button><button class="btn-num" onclick="keypadTypeMatrix('5')">5</button><button class="btn-num" onclick="keypadTypeMatrix('6')">6</button>
+        <button class="btn-num" onclick="keypadTypeMatrix('1')">1</button><button class="btn-num" onclick="keypadTypeMatrix('2')">2</button><button class="btn-num" onclick="keypadTypeMatrix('3')">3</button>
+        <button class="btn-clear" style="background:#ff4757; color:#fff" onclick="keypadTypeMatrix('AC')">AC</button>
+        <button class="btn-num" onclick="keypadTypeMatrix('0')">0</button>
+        <button class="btn-num" onclick="keypadTypeMatrix('.')">.</button>
+        <button class="btn-clear" onclick="keypadTypeMatrix('B')">⌫</button>
+      </div>
+      <div class="display" style="min-height: 80px; justify-content: center;">
+        <div id="matrix-res" style="color: #b22222; font-family: 'Courier New', monospace; font-size: 1.5rem; font-weight: 700; text-align: center;">det(A) = 0</div>
+      </div>
+      <div class="lesson-box visible" id="matrix-lesson">
+        <div class="lesson-title">Determinant Rule</div>
+        For a 2x2 matrix, det = (a × d) - (b × c).
+      </div>
+    </div>
+
+    <!-- FINANCE PANEL -->
+    <div class="panel" id="panel-finance">
+      <div style="background: rgba(0,0,0,0.05); padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+        <div style="font-size: 0.7rem; color: #888; text-transform: uppercase; margin-bottom: 8px;">Compound Interest</div>
+        <div class="ld-input-row" style="margin-bottom: 10px;">
+          <select class="ld-input" id="fin-currency" onchange="updateCurrencySymbol(); calcFinance()" style="flex: 1; min-width: 60px;">
+            <option value="$">USD ($)</option>
+            <option value="€">EUR (€)</option>
+            <option value="£">GBP (£)</option>
+            <option value="R">ZAR (R)</option>
+            <option value="¥">JPY (¥)</option>
+          </select>
+          <input class="ld-input" type="number" id="fin-p" placeholder="Principal ($)" onfocus="setActiveFinance(this)" oninput="calcFinance()" style="flex: 2;">
+        </div>
+        <div class="ld-input-row">
+          <input class="ld-input" type="number" id="fin-r" placeholder="Rate (%)" onfocus="setActiveFinance(this)" oninput="calcFinance()">
+          <input class="ld-input" type="number" id="fin-t" placeholder="Years" onfocus="setActiveFinance(this)" oninput="calcFinance()">
+        </div>
+      </div>
+      <div class="display" style="min-height: 100px; justify-content: center;">
+        <div id="finance-res" style="color: #b22222; font-family: 'Courier New', monospace; font-size: 1.8rem; font-weight: 700; text-align: center;">$0.00</div>
+      </div>
+
+      <div class="keypad" style="margin-top: 15px;">
+        <button class="btn-num" onclick="keypadTypeFinance('7')">7</button><button class="btn-num" onclick="keypadTypeFinance('8')">8</button><button class="btn-num" onclick="keypadTypeFinance('9')">9</button>
+        <button class="btn-num" onclick="keypadTypeFinance('4')">4</button><button class="btn-num" onclick="keypadTypeFinance('5')">5</button><button class="btn-num" onclick="keypadTypeFinance('6')">6</button>
+        <button class="btn-num" onclick="keypadTypeFinance('1')">1</button><button class="btn-num" onclick="keypadTypeFinance('2')">2</button><button class="btn-num" onclick="keypadTypeFinance('3')">3</button>
+        <button class="btn-clear" style="background:#ff4757; color:#fff" onclick="keypadTypeFinance('AC')">AC</button>
+        <button class="btn-num" onclick="keypadTypeFinance('0')">0</button>
+        <button class="btn-num" onclick="keypadTypeFinance('.')">.</button>
+        <button class="btn-clear" onclick="keypadTypeFinance('B')">⌫</button>
+      </div>
+
+      <div class="lesson-box visible" id="finance-lesson">
+        <div class="lesson-title">Growth Formula</div>
+        A = P(1 + r/n)<sup>nt</sup>. This tool assumes annual compounding (n=1).
+      </div>
+    </div>
+
+    <!-- BYTE CALCULATOR PANEL -->
+    <div class="panel" id="panel-bytes">
+      <div style="background: rgba(0,0,0,0.05); padding: 15px; border-radius: 12px;">
+        <div style="margin-bottom: 10px;">
+          <div style="font-size: 0.7rem; color: #888; text-transform: uppercase; margin-bottom: 4px;">Bits (bit)</div>
+          <input class="ld-input" type="number" id="byte-bit" onfocus="setActiveByteInput(this)" oninput="syncBytes('bit')" style="width: 100%; color: #fff;">
+        </div>
+        <div style="margin-bottom: 10px;">
+          <div style="font-size: 0.7rem; color: #888; text-transform: uppercase; margin-bottom: 4px;">Bytes (B)</div>
+          <input class="ld-input" type="number" id="byte-b" onfocus="setActiveByteInput(this)" oninput="syncBytes('b')" style="width: 100%; color: #fff;">
+        </div>
+        <div style="margin-bottom: 10px;">
+          <div style="font-size: 0.7rem; color: #888; text-transform: uppercase; margin-bottom: 4px;">Kilobytes (KB)</div>
+          <input class="ld-input" type="number" id="byte-kb" onfocus="setActiveByteInput(this)" oninput="syncBytes('kb')" style="width: 100%; color: #fff;">
+        </div>
+        <div style="margin-bottom: 10px;">
+          <div style="font-size: 0.7rem; color: #888; text-transform: uppercase; margin-bottom: 4px;">Megabytes (MB)</div>
+          <input class="ld-input" type="number" id="byte-mb" onfocus="setActiveByteInput(this)" oninput="syncBytes('mb')" style="width: 100%; color: #fff;">
+        </div>
+      </div>
+
+      <div class="keypad" style="margin-top: 15px;">
+        <button class="btn-num" onclick="keypadTypeBytes('7')">7</button><button class="btn-num" onclick="keypadTypeBytes('8')">8</button><button class="btn-num" onclick="keypadTypeBytes('9')">9</button>
+        <button class="btn-num" onclick="keypadTypeBytes('4')">4</button><button class="btn-num" onclick="keypadTypeBytes('5')">5</button><button class="btn-num" onclick="keypadTypeBytes('6')">6</button>
+        <button class="btn-num" onclick="keypadTypeBytes('1')">1</button><button class="btn-num" onclick="keypadTypeBytes('2')">2</button><button class="btn-num" onclick="keypadTypeBytes('3')">3</button>
+        <button class="btn-clear" style="background:#ff4757; color:#fff" onclick="keypadTypeBytes('AC')">AC</button>
+        <button class="btn-num" onclick="keypadTypeBytes('0')">0</button>
+        <button class="btn-num" onclick="keypadTypeBytes('.')">.</button>
+        <button class="btn-clear" onclick="keypadTypeBytes('B')">⌫</button>
+      </div>
+
+      <div class="lesson-box visible" style="margin-top: 15px;">
+        <div class="lesson-title">Computing Units</div>
+        In binary computing, units use 1024 as the multiplier (2<sup>10</sup>). 1 KB = 1024 Bytes, 1 MB = 1024 KB. 1 Byte is exactly 8 bits.
+      </div>
+    </div>
+
+    <!-- SUBNET CALCULATOR PANEL -->
+    <div class="panel" id="panel-subnet">
+      <div style="background: rgba(0,0,0,0.05); padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+        <div style="font-size: 0.7rem; color: #888; text-transform: uppercase; margin-bottom: 8px;">IP Address, CIDR & Mask</div>
+        <div class="ld-input-row">
+          <input class="ld-input" type="text" id="subnet-ip" placeholder="IP Address" onfocus="setActiveSubnetInput(this)" oninput="calcSubnet('ip')" style="flex: 2; color: #fff;">
+          <input class="ld-input" type="number" id="subnet-cidr" placeholder="CIDR" min="0" max="32" onfocus="setActiveSubnetInput(this)" oninput="calcSubnet('cidr')" style="flex: 1; color: #fff;">
+          <input class="ld-input" type="text" id="subnet-mask" placeholder="Subnet Mask" onfocus="setActiveSubnetInput(this)" oninput="calcSubnet('mask')" style="flex: 2; color: #fff;">
+        </div>
+      </div>
+
+      <div class="display" style="min-height: 180px; justify-content: flex-start; text-align: left; padding: 15px; font-family: monospace; font-size: 0.85rem; color: #333;">
+        <div id="subnet-res">Enter IP and CIDR (e.g. 24)</div>
+      </div>
+
+      <div class="keypad" style="margin-top: 15px;">
+        <button class="btn-num" onclick="keypadTypeSubnet('7')">7</button><button class="btn-num" onclick="keypadTypeSubnet('8')">8</button><button class="btn-num" onclick="keypadTypeSubnet('9')">9</button>
+        <button class="btn-num" onclick="keypadTypeSubnet('4')">4</button><button class="btn-num" onclick="keypadTypeSubnet('5')">5</button><button class="btn-num" onclick="keypadTypeSubnet('6')">6</button>
+        <button class="btn-num" onclick="keypadTypeSubnet('1')">1</button><button class="btn-num" onclick="keypadTypeSubnet('2')">2</button><button class="btn-num" onclick="keypadTypeSubnet('3')">3</button>
+        <button class="btn-clear" style="background:#ff4757; color:#fff" onclick="keypadTypeSubnet('AC')">AC</button>
+        <button class="btn-num" onclick="keypadTypeSubnet('0')">0</button>
+        <button class="btn-num" onclick="keypadTypeSubnet('.')">.</button>
+        <button class="btn-clear" onclick="keypadTypeSubnet('B')">⌫</button>
+      </div>
+
+      <div class="lesson-box visible" id="subnet-lesson" style="margin-top: 15px;">
+        <div class="lesson-title">Subnetting Logic</div>
+        The Subnet Mask separates the <strong>Network ID</strong> from the <strong>Host ID</strong>. 
+        Bitwise ANDing the IP and Mask gives the Network Address. 
+        The remaining bits define the Host range.
+      </div>
+    </div>
+
   </div>
 
   <script>
     function switchTab(name) {
+      // Stop any running animations or timers from the advanced parser when switching tabs
+      if (typeof stopAdvPlaybackTimer === 'function') stopAdvPlaybackTimer();
+      // Also support modular class cleanup if instance exists
+      if (window.advParserInstance && typeof window.advParserInstance.stopPlayback === 'function') {
+        window.advParserInstance.stopPlayback();
+      }
+
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
       const activePanel = document.getElementById('panel-' + name);
       if (activePanel) activePanel.classList.add('active');
       if (name === 'graph') renderGraph();
       if (name === 'geometry') updateGeomUI();
     }
+
+    function calcMatrix() {
+      const a = parseFloat(document.getElementById('mat-a').value) || 0;
+      const b = parseFloat(document.getElementById('mat-b').value) || 0;
+      const c = parseFloat(document.getElementById('mat-c').value) || 0;
+      const d = parseFloat(document.getElementById('mat-d').value) || 0;
+      const det = (a * d) - (b * c);
+      document.getElementById('matrix-res').textContent = `det(A) = ${det}`;
+    }
+
+    function calcFinance() {
+      const currencySymbol = document.getElementById('fin-currency').value;
+      const p = parseFloat(document.getElementById('fin-p').value) || 0;
+      const r = (parseFloat(document.getElementById('fin-r').value) || 0) / 100;
+      const t = parseFloat(document.getElementById('fin-t').value) || 0;
+      if (p > 0 && t > 0) {
+        const amount = p * Math.pow((1 + r), t);
+        document.getElementById('finance-res').textContent = `${currencySymbol}${amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      } else {
+        document.getElementById('finance-res').textContent = `${currencySymbol}0.00`;
+      }
+    }
+
+    // --- MATRIX KEYPAD LOGIC ---
+    let activeMatrixInput = null;
+    function setActiveMatrix(el) { activeMatrixInput = el; }
+    function keypadTypeMatrix(key) {
+      if (key === 'AC') {
+        document.getElementById('mat-a').value = ""; document.getElementById('mat-b').value = "";
+        document.getElementById('mat-c').value = ""; document.getElementById('mat-d').value = "";
+        document.getElementById('matrix-res').textContent = "det(A) = 0"; return;
+      }
+      if (!activeMatrixInput) activeMatrixInput = document.getElementById('mat-a');
+      if (key === 'B') activeMatrixInput.value = activeMatrixInput.value.slice(0, -1);
+      else activeMatrixInput.value += key;
+      calcMatrix();
+    }
+
+    // --- BYTE CALCULATOR LOGIC ---
+    let activeByteInput = null;
+    function setActiveByteInput(el) { activeByteInput = el; }
+    function syncBytes(sourceUnit) {
+      const val = parseFloat(document.getElementById('byte-' + sourceUnit).value);
+      if (isNaN(val)) return;
+      const mults = { 'bit': 0.125, 'b': 1, 'kb': 1024, 'mb': 1024**2 };
+      const bytes = val * mults[sourceUnit];
+      Object.keys(mults).forEach(u => {
+        if (u !== sourceUnit) {
+          const converted = bytes / mults[u];
+          document.getElementById('byte-' + u).value = converted % 1 === 0 ? converted : converted.toFixed(6);
+        }
+      });
+    }
+    function keypadTypeBytes(key) {
+      if (key === 'AC') { ['bit', 'b', 'kb', 'mb'].forEach(u => document.getElementById('byte-' + u).value = ""); return; }
+      if (!activeByteInput) activeByteInput = document.getElementById('byte-b');
+      if (key === 'B') activeByteInput.value = activeByteInput.value.slice(0, -1);
+      else activeByteInput.value += key;
+      syncBytes(activeByteInput.id.replace('byte-', ''));
+    }
+
+    // --- SUBNET CALCULATOR LOGIC ---
+    let activeSubnetInput = null;
+    function setActiveSubnetInput(el) { activeSubnetInput = el; }
+    function keypadTypeSubnet(key) {
+      if (key === 'AC') {
+        document.getElementById('subnet-ip').value = ""; document.getElementById('subnet-cidr').value = "";
+        document.getElementById('subnet-mask').value = "";
+        document.getElementById('subnet-res').textContent = "Enter IP and CIDR (e.g. 24)"; return;
+      }
+      if (!activeSubnetInput) activeSubnetInput = document.getElementById('subnet-ip');
+      if (key === 'B') activeSubnetInput.value = activeSubnetInput.value.slice(0, -1);
+      else activeSubnetInput.value += key;
+      calcSubnet(activeSubnetInput.id.replace('subnet-', ''));
+    }
+    function ipToInt(ip) {
+      const parts = ip.split('.');
+      if (parts.length !== 4) return 0;
+      return parts.reduce((res, octet) => (res << 8) + (parseInt(octet, 10) || 0), 0) >>> 0;
+    }
+    function intToIp(int) {
+      return [(int >>> 24) & 0xFF, (int >>> 16) & 0xFF, (int >>> 8) & 0xFF, int & 0xFF].join('.');
+    }
+    function maskToCidr(mask) {
+      const int = ipToInt(mask);
+      let count = 0;
+      for (let i = 31; i >= 0; i--) {
+        if ((int >>> i) & 1) count++;
+        else break;
+      }
+      return count;
+    }
+    function calcSubnet(source) {
+      const ipEl = document.getElementById('subnet-ip');
+      const cidrEl = document.getElementById('subnet-cidr');
+      const maskEl = document.getElementById('subnet-mask');
+      const resEl = document.getElementById('subnet-res');
+
+      if (source === 'cidr') {
+        const c = parseInt(cidrEl.value);
+        if (!isNaN(c) && c >= 0 && c <= 32) {
+          const m = (c === 0) ? 0 : (~0 << (32 - c)) >>> 0;
+          maskEl.value = intToIp(m);
+        }
+      } else if (source === 'mask') {
+        const mStr = maskEl.value;
+        if (mStr.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/)) {
+          cidrEl.value = maskToCidr(mStr);
+        }
+      }
+
+      const ipStr = ipEl.value;
+      const cidrStr = cidrEl.value;
+      const cidr = parseInt(cidrStr);
+      if (!ipStr.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) || isNaN(cidr) || cidr < 0 || cidr > 32) {
+        resEl.innerHTML = "Invalid IP or CIDR Prefix (0-32)"; return;
+      }
+      const ip = ipToInt(ipStr);
+      const mask = (cidr === 0) ? 0 : (~0 << (32 - cidr)) >>> 0;
+      const network = (ip & mask) >>> 0;
+      const broadcast = (network | ~mask) >>> 0;
+      const hosts = (cidr >= 31) ? 0 : (Math.pow(2, 32 - cidr) - 2);
+      let html = `<strong>Mask:</strong> ${intToIp(mask)}<br><strong>Network:</strong> ${intToIp(network)}/${cidr}<br><strong>Broadcast:</strong> ${intToIp(broadcast)}<br><strong>Hosts:</strong> ${hosts.toLocaleString()}<br>`;
+      if (cidr < 31) html += `<strong>Range:</strong> ${intToIp(network + 1)} - ${intToIp(broadcast - 1)}<br>`;
+      const toBin = (int) => {
+        let b = (int >>> 0).toString(2).padStart(32, '0');
+        return b.match(/.{8}/g).join('.');
+      };
+      html += `<div style="margin-top:10px; font-size:0.7rem; color:#888;">IP Binary:   ${toBin(ip)}<br>Mask Binary: ${toBin(mask)}<br>Net Binary:  ${toBin(network)}</div>`;
+      resEl.innerHTML = html;
+    }
+
+    function updateCurrencySymbol() {
+      document.getElementById('fin-p').placeholder = `Principal (${document.getElementById('fin-currency').value})`;
+    }
+
+    // --- FINANCE KEYPAD LOGIC ---
+    let activeFinanceInput = null;
+    function setActiveFinance(el) { activeFinanceInput = el; }
+    function keypadTypeFinance(key) {
+      if (key === 'AC') {
+        document.getElementById('fin-p').value = ""; document.getElementById('fin-r').value = ""; document.getElementById('fin-t').value = "";
+        document.getElementById('finance-res').textContent = "$0.00"; return;
+        updateCurrencySymbol(); // Update placeholder after clearing
+      }
+      if (!activeFinanceInput) activeFinanceInput = document.getElementById('fin-p');
+      if (key === 'B') activeFinanceInput.value = activeFinanceInput.value.slice(0, -1);
+      else activeFinanceInput.value += key;
+      calcFinance();
+    }
+
+    // Initialize currency symbol on load
+    window.addEventListener('load', updateCurrencySymbol);
 
     // --- FRACTION KEYPAD & LIVE LOGIC ---
     let activeFracInput = null;

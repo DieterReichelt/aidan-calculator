@@ -10,7 +10,7 @@ set -e  # Exit on error
 
 # Configuration
 # Use SSH URL for secure GitHub access (recommended for production)
-# Ensure SSH key is configured: ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_github
+# Ensure SSH key is configured: ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_git
 REPO_URL="${REPO_URL:-git@github.com:DieterReichelt/Aidan-Calculator.git}"
 REPO_DIR="${REPO_DIR:-/opt/aidans-calculator}"
 BUILD_DIR="${REPO_DIR}/dist"
@@ -29,11 +29,13 @@ NC='\033[0m' # No Color
 ################################################################################
 
 log() {
-    echo -e "${GREEN}[$(date +'%Y-%m-%d %H:%M:%S')]${NC} $1" | tee -a "$LOG_FILE"
+    # Create log file if it doesn't exist and ensure it's writable
+    [ ! -f "$LOG_FILE" ] && touch "$LOG_FILE" 2>/dev/null || true
+    echo -e "${GREEN}[$(date +'%Y-%m-%d %H:%M:%S')]${NC} $1" | tee -a "$LOG_FILE" 2>/dev/null || echo -e "${GREEN}[$(date +'%Y-%m-%d %H:%M:%S')]${NC} $1"
 }
 
 error() {
-    echo -e "${RED}[$(date +'%Y-%m-%d %H:%M:%S')] ERROR: $1${NC}" | tee -a "$LOG_FILE"
+    echo -e "${RED}[$(date +'%Y-%m-%d %H:%M:%S')] ERROR: $1${NC}" | tee -a "$LOG_FILE" 2>/dev/null || echo -e "${RED}[$(date +'%Y-%m-%d %H:%M:%S')] ERROR: $1${NC}"
     exit 1
 }
 
@@ -50,15 +52,22 @@ check_requirements() {
     
     log "✓ All requirements met (git, Node.js, npm)"
     
-    # Check SSH key for GitHub access
-    if [[ "$REPO_URL" == git@github.com* ]]; then
-        log "Checking GitHub SSH access..."
-        if ! ssh -T git@github.com &> /dev/null; then
-            warning "SSH key not configured or GitHub SSH connection failed"
+    # Check SSH key for Git server access
+    if [[ "$REPO_URL" =~ ^git@ ]]; then
+        # Extract host from REPO_URL (e.g., github.com or your Gitea IP)
+        local git_host=$(echo "$REPO_URL" | sed -e 's/git@//' -e 's/:.*//')
+        local identity_file="$HOME/.ssh/id_ed25519_git"
+        
+        log "Checking SSH access to $git_host..."
+        
+        # Test connection explicitly using the generated identity file if it exists
+        if ! ssh -i "$identity_file" -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=accept-new "$git_host" 2>&1 | grep -qE "successfully authenticated|PTY allocation request failed"; then
+            warning "SSH key not configured or connection to $git_host failed"
             warning "Set up SSH key or switch to HTTPS:"
-            warning "  export REPO_URL='https://github.com/DieterReichelt/Aidan-Calculator.git'"
+            local https_url=$(echo "$REPO_URL" | sed -e 's/:/\//' -e 's/git@/https:\/\//')
+            warning "  export REPO_URL='$https_url'"
         else
-            log "✓ GitHub SSH access verified"
+            log "✓ Git server SSH access verified"
         fi
     fi
 }
@@ -92,7 +101,8 @@ install_dependencies() {
     log "Installing npm dependencies..."
     cd "$REPO_DIR"
     
-    npm ci --omit=dev || error "Failed to install dependencies"
+    # Ensure devDependencies (like Vite) are installed for the build process
+    npm ci --include=dev || error "Failed to install dependencies"
     log "✓ Dependencies installed"
 }
 
@@ -100,7 +110,7 @@ build_project() {
     log "Building project..."
     cd "$REPO_DIR"
     
-    npm run build || error "Build failed"
+    ./node_modules/.bin/vite build || error "Build failed"
     
     if [ ! -d "$BUILD_DIR" ]; then
         error "Build directory not found at $BUILD_DIR"
@@ -179,6 +189,9 @@ main() {
     log "Starting Aidan's Calculator Deployment"
     log "=========================================="
     
+    # Ensure we are in the script directory to resolve relative paths for setup-ssh.sh
+    cd "$(dirname "$0")"
+
     check_requirements
     setup_directories
     update_repository

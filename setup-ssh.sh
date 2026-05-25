@@ -1,20 +1,26 @@
 #!/bin/bash
 
 ################################################################################
-# GitHub SSH Key Setup Script
-# Purpose: Configure SSH keys for secure GitHub access on production server
+# Git SSH Key Setup Script
+# Purpose: Configure SSH keys for secure Git access (Gitea/GitHub) on production server
 # Usage: sudo ./setup-ssh.sh [--user www-data]
 ################################################################################
 
 set -e
 
 # Configuration
-SSH_USER="${1:-root}"
+SSH_USER="${1:-$USER}"
 SSH_USER="${SSH_USER#--user }"  # Handle --user flag
 SSH_HOME=$(eval echo "~${SSH_USER}")
 SSH_DIR="${SSH_HOME}/.ssh"
-SSH_KEY_FILE="${SSH_DIR}/id_ed25519_github"
+SSH_KEY_FILE="${SSH_DIR}/id_ed25519_git"
 SSH_CONFIG_FILE="${SSH_DIR}/config"
+GIT_HOST="${GIT_HOST:-github.com}"
+
+# Strip protocol and path if accidentally provided (e.g., https://host.com/path -> host.com)
+GIT_HOST="${GIT_HOST#http://}"
+GIT_HOST="${GIT_HOST#https://}"
+GIT_HOST="${GIT_HOST%%/*}"
 
 # Color codes
 RED='\033[0;31m'
@@ -50,7 +56,7 @@ warning() {
 
 main() {
     echo -e "${BLUE}========================================${NC}"
-    echo -e "${BLUE}GitHub SSH Key Setup${NC}"
+    echo -e "${BLUE}Git SSH Key Setup (Gitea/GitHub)${NC}"
     echo -e "${BLUE}========================================${NC}"
     echo ""
     
@@ -86,13 +92,13 @@ main() {
             ssh-keygen -t ed25519 \
                 -f "$SSH_KEY_FILE" \
                 -N "" \
-                -C "github-$(hostname)-$SSH_USER" \
+                -C "deploy-$(hostname)-$SSH_USER" \
                 || error "Failed to generate SSH key"
         else
             sudo -u "$SSH_USER" ssh-keygen -t ed25519 \
                 -f "$SSH_KEY_FILE" \
                 -N "" \
-                -C "github-$(hostname)-$SSH_USER" \
+                -C "deploy-$(hostname)-$SSH_USER" \
                 || error "Failed to generate SSH key"
         fi
         
@@ -104,15 +110,15 @@ main() {
         info "SSH key already exists: $SSH_KEY_FILE"
     fi
     
-    # Create SSH config for GitHub if it doesn't exist
+    # Create SSH config if it doesn't exist
     if [ ! -f "$SSH_CONFIG_FILE" ]; then
         info "Creating SSH config..."
-        cat > "$SSH_CONFIG_FILE" <<'EOF'
-# GitHub SSH Configuration
-Host github.com
-    HostName github.com
+        cat > "$SSH_CONFIG_FILE" <<EOF
+# Git Server SSH Configuration
+Host $GIT_HOST
+    HostName $GIT_HOST
     User git
-    IdentityFile ~/.ssh/id_ed25519_github
+    IdentityFile %d/.ssh/id_ed25519_git
     AddKeysToAgent yes
     IdentitiesOnly yes
     StrictHostKeyChecking accept-new
@@ -125,31 +131,31 @@ EOF
         
         log "SSH config created"
     else
-        # Check if GitHub config exists in file
-        if ! grep -q "Host github.com" "$SSH_CONFIG_FILE"; then
-            warning "GitHub SSH config not found in $SSH_CONFIG_FILE"
-            info "Adding GitHub configuration..."
-            cat >> "$SSH_CONFIG_FILE" <<'EOF'
+        # Check if config for this host exists
+        if ! grep -q "Host $GIT_HOST" "$SSH_CONFIG_FILE"; then
+            warning "SSH config for $GIT_HOST not found in $SSH_CONFIG_FILE"
+            info "Adding configuration..."
+            cat >> "$SSH_CONFIG_FILE" <<EOF
 
-# GitHub SSH Configuration
-Host github.com
-    HostName github.com
+# Git Server SSH Configuration
+Host $GIT_HOST
+    HostName $GIT_HOST
     User git
-    IdentityFile ~/.ssh/id_ed25519_github
+    IdentityFile %d/.ssh/id_ed25519_git
     AddKeysToAgent yes
     IdentitiesOnly yes
     StrictHostKeyChecking accept-new
 EOF
-            log "GitHub SSH config added"
+            log "SSH config for $GIT_HOST added"
         else
-            info "GitHub SSH config already exists"
+            info "SSH config for $GIT_HOST already exists"
         fi
     fi
     
     # Display public key
     echo ""
     echo -e "${BLUE}========================================${NC}"
-    echo -e "${BLUE}Your GitHub SSH Public Key${NC}"
+    echo -e "${BLUE}Your SSH Public Key${NC}"
     echo -e "${BLUE}========================================${NC}"
     echo ""
     cat "${SSH_KEY_FILE}.pub"
@@ -157,23 +163,22 @@ EOF
     
     # Test SSH connection
     echo -e "${BLUE}========================================${NC}"
-    echo -e "${BLUE}Testing GitHub SSH Connection${NC}"
+    echo -e "${BLUE}Testing SSH Connection to $GIT_HOST${NC}"
     echo -e "${BLUE}========================================${NC}"
     echo ""
     
     if [[ "$SSH_USER" == "root" ]] || [[ "$EUID" != 0 ]]; then
-        if ssh -T git@github.com 2>&1 | grep -q "successfully authenticated"; then
-            log "GitHub SSH connection successful!"
+        if ssh -T "git@$GIT_HOST" 2>&1 | grep -qE "successfully authenticated|PTY allocation request failed"; then
+            log "SSH connection successful!"
         else
-            warning "Could not verify GitHub connection"
-            info "Add the public key above to your GitHub account:"
-            info "  https://github.com/settings/keys"
-            info "Then run: ssh -T git@github.com"
+            warning "Could not verify connection to $GIT_HOST"
+            info "Add the public key above to your Git server account."
+            info "Then run: ssh -T git@$GIT_HOST"
         fi
     else
-        sudo -u "$SSH_USER" ssh -T git@github.com 2>&1 | grep -q "successfully authenticated" && \
-            log "GitHub SSH connection successful!" || \
-            warning "Could not verify GitHub connection"
+        sudo -u "$SSH_USER" ssh -T "git@$GIT_HOST" 2>&1 | grep -qE "successfully authenticated|PTY allocation request failed" && \
+            log "SSH connection successful!" || \
+            warning "Could not verify connection to $GIT_HOST"
     fi
     
     echo ""
@@ -183,9 +188,9 @@ EOF
     echo ""
     echo "Next steps:"
     echo "1. Copy the public key above"
-    echo "2. Add it to GitHub: https://github.com/settings/keys"
-    echo "3. Update deploy.sh with your GitHub SSH URL:"
-    echo "   export REPO_URL='git@github.com:DieterReichelt/Aidan-Calculator.git'"
+    echo "2. Add it to your Git server (Gitea Settings -> SSH / GPG Keys)"
+    echo "3. Update your environment with your repository SSH URL:"
+    echo "   export REPO_URL='git@$GIT_HOST:username/Aidan-Calculator.git'"
     echo "4. Run: sudo $SSH_USER -c '/path/to/deploy.sh'"
     echo ""
 }
@@ -203,7 +208,7 @@ Options:
 
 Examples:
   # Setup SSH for root user
-  sudo $0
+  sudo GIT_HOST="gitea.example.com" $0
 
   # Setup SSH for www-data user (Nginx)
   sudo $0 --user www-data
@@ -214,7 +219,7 @@ Examples:
 Notes:
   - Run with sudo for system users (www-data, www, etc.)
   - Public key will be displayed - add it to GitHub settings
-  - Ensure your firewall allows outbound SSH (port 22)
+  - GIT_HOST should be a domain or IP, NOT a URL starting with http://
 
 EOF
     exit 0

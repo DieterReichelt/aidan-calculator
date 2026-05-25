@@ -11,12 +11,22 @@ export class GrapherCalculator {
     this.valB = document.getElementById('val-b');
     this.valC = document.getElementById('val-c');
     
+    this.mouseX = null;
     this.init();
   }
 
   init() {
     if (this.canvas) {
       this.render();
+      this.canvas.addEventListener('mousemove', (e) => {
+        const rect = this.canvas.getBoundingClientRect();
+        this.mouseX = e.clientX - rect.left;
+        this.render();
+      });
+      this.canvas.addEventListener('mouseleave', () => {
+        this.mouseX = null;
+        this.render();
+      });
     }
     
     window.addEventListener('tab-switched', (e) => {
@@ -44,8 +54,8 @@ export class GrapherCalculator {
 
     ctx.strokeStyle = '#eee';
     ctx.beginPath();
-    for(let x=0; x<this.canvas.width; x+=scale) { ctx.moveTo(x, 0); ctx.lineTo(x, this.canvas.height); }
-    for(let y=0; y<this.canvas.height; y+=scale) { ctx.moveTo(0, y); ctx.lineTo(this.canvas.width, y); }
+    for (let x = 0; x < this.canvas.width; x += scale) { ctx.moveTo(x, 0); ctx.lineTo(x, this.canvas.height); }
+    for (let y = 0; y < this.canvas.height; y += scale) { ctx.moveTo(0, y); ctx.lineTo(this.canvas.width, y); }
     ctx.stroke();
 
     ctx.strokeStyle = '#aaa';
@@ -72,5 +82,39 @@ export class GrapherCalculator {
       else ctx.lineTo(px, py);
     }
     ctx.stroke();
+
+      // Draw Tangent Line if mouse is hovering
+      if (this.mouseX !== null) {
+        const x0 = (this.mouseX - centerX) / scale;
+        let y0, slope;
+
+        if (preset === 'linear') {
+          y0 = a * x0 + b;
+          slope = a;
+        } else if (preset === 'quad') {
+          y0 = a * x0 * x0 + b * x0 + c;
+          slope = 2 * a * x0 + b;
+        } else if (preset === 'sin') {
+          y0 = a * Math.sin(b * x0 + c);
+          slope = a * b * Math.cos(b * x0 + c);
+        }
+
+        const py0 = centerY - (y0 * scale);
+        
+        // Draw point
+        ctx.fillStyle = '#333';
+        ctx.beginPath();
+        ctx.arc(this.mouseX, py0, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Draw tangent line segment
+        ctx.strokeStyle = 'rgba(0, 150, 255, 0.5)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        const dx = 50; // length of tangent line
+        ctx.moveTo(this.mouseX - dx, py0 + (slope * dx));
+        ctx.lineTo(this.mouseX + dx, py0 - (slope * dx));
+        ctx.stroke();
+      }
   }
 }

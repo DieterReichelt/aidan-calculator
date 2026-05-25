@@ -1,7 +1,7 @@
 # Deployment Instructions
 
 ## Overview
-This guide explains how to deploy the Aidan's Math Notebook calculator to a production LXC Proxmox server using the automated `deploy.sh` script.
+This guide explains how to deploy the Aidan's Math Notebook calculator to a production LXC Proxmox server from GitHub using the automated `deploy.sh` script.
 
 ## Prerequisites
 
@@ -17,11 +17,11 @@ apt update
 apt install -y git nodejs npm nginx
 ```
 
-## SSH Setup (Recommended for Production)
+## SSH Setup (Recommended for Production & Self-Hosting)
 
-### Secure GitHub Access with SSH
+### Secure Git Access with SSH
 
-For production environments, SSH is more secure and reliable than HTTPS credentials.
+For production environments and self-hosted Gitea instances, SSH is more secure and reliable than HTTPS credentials.
 
 #### Quick Setup (Automated)
 
@@ -35,7 +35,7 @@ sudo ./setup-ssh.sh --user www-data
 
 This script will:
 - Generate an ED25519 SSH key
-- Create SSH config for GitHub
+- Create SSH config for your Git server
 - Display your public key
 - Test the connection
 
@@ -43,17 +43,17 @@ This script will:
 
 ```bash
 # Generate SSH key (as root or your deployment user)
-ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_github -N "" -C "github-$(hostname)"
+ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_git -N "" -C "deploy-$(hostname)"
 
 # Create SSH config
 mkdir -p ~/.ssh
 chmod 700 ~/.ssh
 
 cat >> ~/.ssh/config <<EOF
-Host github.com
-    HostName github.com
+Host <DOMAIN_OR_IP>
+    HostName <DOMAIN_OR_IP>
     User git
-    IdentityFile ~/.ssh/id_ed25519_github
+    IdentityFile ~/.ssh/id_ed25519_git
     AddKeysToAgent yes
     IdentitiesOnly yes
     StrictHostKeyChecking accept-new
@@ -62,7 +62,7 @@ EOF
 chmod 600 ~/.ssh/config
 
 # Display public key
-cat ~/.ssh/id_ed25519_github.pub
+cat ~/.ssh/id_ed25519_git.pub
 ```
 
 #### Add Public Key to GitHub
@@ -76,7 +76,7 @@ cat ~/.ssh/id_ed25519_github.pub
 
 ```bash
 ssh -T git@github.com
-# Output: Hi DieterReichelt! You've successfully authenticated...
+# Output: Hi there! You've successfully authenticated...
 ```
 
 #### Update Repository URL
@@ -242,8 +242,8 @@ sudo ./deploy.sh
 ## What the Script Does
 
 1. ✅ **Checks Requirements** - Verifies git, Node.js, and npm are installed
-2. ✅ **Clones/Updates Repository** - Gets latest code from GitHub
-3. ✅ **Installs Dependencies** - Runs `npm ci --omit=dev` (production dependencies only)
+2. ✅ **Clones/Updates Repository** - Gets latest code from GitHub (including build tools)
+3. ✅ **Installs Dependencies** - Runs `npm ci` (all dependencies, including dev for build)
 4. ✅ **Builds Project** - Runs `npm run build` (creates optimized dist/ folder)
 5. ✅ **Deploys Files** - Copies build to web root with backup
 6. ✅ **Sets Permissions** - Configures ownership for web server
@@ -300,8 +300,8 @@ sudo chmod +x /path/to/deploy.sh
 ```bash
 # Clean and reinstall
 cd /opt/aidans-calculator
-sudo rm -rf node_modules package-lock.json
-sudo npm ci --omit=dev
+sudo rm -rf node_modules package-lock.json # Remove existing modules
+sudo npm ci # Install all dependencies for build
 ```
 
 ### Web server not reloading

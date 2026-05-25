@@ -5,6 +5,7 @@ export class FractionCalculator {
   constructor() {
     this.op = '+';
     this.activeInput = null;
+    this.lastResult = null;
     
     this.visualResEl = document.getElementById('frac-visual-res');
     this.decResEl = document.getElementById('frac-dec-res');
@@ -46,7 +47,7 @@ export class FractionCalculator {
     const dRaw = document.getElementById(`f-${p}-d`).value;
     const d = dRaw === "" ? 1 : parseInt(dRaw);
     if (!isFinite(d) || d === 0) return null;
-    return MathEngine.simplifyFraction(Math.abs(w) * d + n * (w < 0 ? -1 : 1), d);
+    return { n: Math.abs(w) * d + n * (w < 0 ? -1 : 1), d: d };
   }
 
   calculate() {
@@ -67,20 +68,41 @@ export class FractionCalculator {
       return;
     }
     
-    let res = MathEngine.simplifyFraction(rn, rd);
-    const formatVisual = (f) => {
-      let w = Math.trunc(f.n / f.d), n = Math.abs(f.n % f.d);
-      return `<div style="display:inline-flex; align-items:center;">${w ? `<span>${w}</span>` : (n ? '' : '<span>0</span>')}${n ? `<div style="display:flex; flex-direction:column; align-items:center; margin-left:5px;"><span style="border-bottom:2px solid #333; padding:0 3px;">${n}</span><span>${f.d}</span></div>` : ''}</div>`;
-    };
+    this.lastResult = { A, B, res: { n: rn, d: rd }, op: this.op };
+    this._updateDisplay(A, B, { n: rn, d: rd }, this.op);
+  }
+
+  simplifyResult() {
+    if (!this.lastResult) return;
     
-    let opSym = this.op === '*' ? '×' : (this.op === '/' ? '÷' : (this.op === '-' ? '−' : '+'));
+    const simplified = MathEngine.simplifyFraction(this.lastResult.res.n, this.lastResult.res.d);
+    this._updateDisplay(this.lastResult.A, this.lastResult.B, simplified, this.lastResult.op, true);
+  }
+
+  _formatVisual(f) {
+    let w = Math.trunc(f.n / f.d), n = Math.abs(f.n % f.d);
+    return `<div style="display:inline-flex; align-items:center;">${w ? `<span>${w}</span>` : (n ? '' : '<span>0</span>')}${n ? `<div style="display:flex; flex-direction:column; align-items:center; margin-left:5px;"><span style="border-bottom:2px solid #333; padding:0 3px;">${n}</span><span>${f.d}</span></div>` : ''}</div>`;
+  }
+
+  _updateDisplay(A, B, res, op, isSimplified = false) {
+    let opSym = op === '*' ? '×' : (op === '/' ? '÷' : (op === '-' ? '−' : '+'));
+    
     if (this.visualResEl) {
-      this.visualResEl.innerHTML = Sanitizer.sanitizeHTML(`<div style="display:flex; align-items:center; justify-content:center; gap:15px; flex-wrap:wrap;">${formatVisual(A)} <span style="font-size:1.5rem; color:#555;">${opSym}</span> ${formatVisual(B)} <span style="font-size:1.5rem; color:#b22222;">=</span> <div style="color:#b22222;">${formatVisual(res)}</div></div>`);
+      this.visualResEl.innerHTML = Sanitizer.sanitizeHTML(`
+        <div style="display:flex; align-items:center; justify-content:center; gap:15px; flex-wrap:wrap;">
+          ${this._formatVisual(A)} 
+          <span style="font-size:1.5rem; color:#555;">${opSym}</span> 
+          ${this._formatVisual(B)} 
+          <span style="font-size:1.5rem; color:#b22222;">=</span> 
+          <div style="color:#b22222;">${this._formatVisual(res)}</div>
+        </div>`);
     }
+
     if (this.decResEl) this.decResEl.textContent = `≈ ${(res.n / res.d).toFixed(6)}`;
     
     if (this.lessonEl) {
-      this.lessonEl.innerHTML = `<div class='lesson-title'>Step-by-Step</div><strong>Simplified Result: ${res.n}/${res.d}</strong>`;
+      const title = isSimplified ? 'Simplified Result' : 'Calculation Result';
+      this.lessonEl.innerHTML = `<div class='lesson-title'>Step-by-Step</div><strong>${title}: ${res.n}/${res.d}</strong>`;
       this.lessonEl.classList.add('visible');
     }
   }

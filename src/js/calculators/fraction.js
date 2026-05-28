@@ -1,5 +1,6 @@
 import { MathEngine } from '../core/math-engine.js';
 import { Sanitizer } from '../utils/sanitizer.js';
+import { ErrorHandler, CalculatorError, ERROR_CODES } from '../utils/errors.js';
 
 export class FractionCalculator {
   constructor() {
@@ -54,7 +55,10 @@ export class FractionCalculator {
     let A = this.getF('a'), B = this.getF('b'), rn, rd;
     if (!A || !B) {
       if (this.decResEl) this.decResEl.textContent = "";
-      if (this.visualResEl) this.visualResEl.textContent = "Error: denominator cannot be 0";
+      if (this.visualResEl) this.visualResEl.textContent = ErrorHandler.handle(
+        new CalculatorError('Denominator cannot be 0', ERROR_CODES.INVALID_INPUT, 'Denominator cannot be 0'),
+        'FractionCalculator'
+      );
       return;
     }
     
@@ -64,7 +68,10 @@ export class FractionCalculator {
     else { rn = A.n * B.d; rd = A.d * B.n; }
     
     if (rd === 0) {
-      if (this.visualResEl) this.visualResEl.textContent = "Error: division by zero";
+      if (this.visualResEl) this.visualResEl.textContent = ErrorHandler.handle(
+        ErrorHandler.createDivisionByZeroError(),
+        'FractionCalculator'
+      );
       return;
     }
     
@@ -102,7 +109,7 @@ export class FractionCalculator {
     
     if (this.lessonEl) {
       const title = isSimplified ? 'Simplified Result' : 'Calculation Result';
-      this.lessonEl.innerHTML = `<div class='lesson-title'>Step-by-Step</div><strong>${title}: ${res.n}/${res.d}</strong>`;
+      this.lessonEl.innerHTML = Sanitizer.sanitizeHTML(`<div class='lesson-title'>Step-by-Step</div><strong>${title}: ${res.n}/${res.d}</strong>`);
       this.lessonEl.classList.add('visible');
     }
   }

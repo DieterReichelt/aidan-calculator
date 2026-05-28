@@ -12,25 +12,32 @@ export class BaseConverterCalculator {
   syncBase(type) {
     const el = this.inputs[type];
     if (!el) return;
-    
-    let val;
-    try {
-      if (type === 'dec') val = parseInt(el.value, 10);
-      else if (type === 'bin') val = parseInt(el.value, 2);
-      else if (type === 'hex') val = parseInt(el.value, 16);
-      else if (type === 'oct') val = parseInt(el.value, 8);
-      
-      if (isNaN(val)) return;
-      
-      if (type !== 'dec') this.inputs.dec.value = val.toString(10);
-      if (type !== 'bin') this.inputs.bin.value = val.toString(2);
-      if (type !== 'hex') this.inputs.hex.value = val.toString(16).toUpperCase();
-      if (type !== 'oct') this.inputs.oct.value = val.toString(8);
-      
-      this.updateExplanation(val);
-    } catch(e) {
-      console.error('Base conversion error', e);
+
+    const raw = el.value.trim();
+    if (!raw) return;
+
+    const patterns = { dec: /^-?\d+$/, bin: /^[01]+$/, hex: /^[0-9A-Fa-f]+$/, oct: /^[0-7]+$/ };
+    if (!patterns[type].test(raw)) {
+      el.setCustomValidity(`Invalid character for ${type} input`);
+      el.reportValidity();
+      return;
     }
+    el.setCustomValidity('');
+
+    let val;
+    if (type === 'dec') val = parseInt(raw, 10);
+    else if (type === 'bin') val = parseInt(raw, 2);
+    else if (type === 'hex') val = parseInt(raw, 16);
+    else if (type === 'oct') val = parseInt(raw, 8);
+
+    if (isNaN(val)) return;
+
+    if (type !== 'dec') this.inputs.dec.value = val.toString(10);
+    if (type !== 'bin') this.inputs.bin.value = val.toString(2);
+    if (type !== 'hex') this.inputs.hex.value = val.toString(16).toUpperCase();
+    if (type !== 'oct') this.inputs.oct.value = val.toString(8);
+
+    this.updateExplanation(val);
   }
 
   updateExplanation(n) {

@@ -1,3 +1,5 @@
+import { Sanitizer } from '../utils/sanitizer.js';
+
 export class GeometryCalculator {
   constructor() {
     this.shapeSelect = document.getElementById('geom-shape');
@@ -55,7 +57,10 @@ export class GeometryCalculator {
     const shape = this.shapeSelect?.value || 'circle';
     const v1 = parseFloat(document.getElementById('geom-val-1')?.value) || 0;
     const v2 = parseFloat(document.getElementById('geom-val-2')?.value) || 0;
-    
+
+    const needsBoth = shape === 'rectangle' || shape === 'triangle';
+    if (v1 <= 0 || (needsBoth && v2 <= 0)) return;
+
     let area, perim, steps = "";
     if (shape === 'circle') {
       area = Math.PI * v1 * v1; perim = 2 * Math.PI * v1;
@@ -67,14 +72,14 @@ export class GeometryCalculator {
       if (this.labels.l2) this.labels.l2.textContent = "W=" + v2;
       steps = `1. Area = L × W = ${v1} × ${v2} = ${area}<br>2. Perimeter = 2(L + W) = 2(${v1} + ${v2}) = ${perim}`;
     } else if (shape === 'triangle') {
-      area = 0.5 * v1 * v2; 
+      area = 0.5 * v1 * v2;
       if (this.labels.l1) this.labels.l1.textContent = "b=" + v1;
       if (this.labels.l2) this.labels.l2.textContent = "h=" + v2;
       steps = `1. Area = ½ × b × h = 0.5 × ${v1} × ${v2} = ${area}`;
     }
-    
-    if (v1 > 0 && this.lessonEl) {
-      this.lessonEl.innerHTML = `<div class="lesson-title">${shape.toUpperCase()} Formulas</div>${steps}`;
+
+    if (this.lessonEl) {
+      this.lessonEl.innerHTML = Sanitizer.sanitizeHTML(`<div class="lesson-title">${shape.toUpperCase()} Formulas</div>${steps}`);
       this.lessonEl.classList.add('visible');
     }
   }

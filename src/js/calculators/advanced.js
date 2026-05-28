@@ -2,6 +2,7 @@ import { Parser } from '../core/parser.js';
 import { Evaluator } from '../core/evaluator.js';
 import { CONFIG } from '../config.js';
 import { ErrorHandler } from '../utils/errors.js';
+import { Sanitizer } from '../utils/sanitizer.js';
 
 export class AdvancedParserCalculator {
   constructor() {
@@ -149,8 +150,8 @@ export class AdvancedParserCalculator {
     
     this.stepsEl.innerHTML = this.latestSteps
       .slice(0, this.playbackIndex)
-      .map((s, i) => (
-        `<div class="history-item"><strong>${i + 1}.</strong> token=<strong>${s.token}</strong> | op=[${s.operatorStack.join(' ')}] | out=[${s.outputQueue.join(' ')}]</div>`
+      .map((s, i) => Sanitizer.sanitizeHTML(
+        `<div class="history-item"><strong>${i + 1}.</strong> token=<strong>${Sanitizer.escapeHTML(String(s.token))}</strong> | op=[${s.operatorStack.map(t => Sanitizer.escapeHTML(String(t))).join(' ')}] | out=[${s.outputQueue.map(t => Sanitizer.escapeHTML(String(t))).join(' ')}]</div>`
       )).join('');
     
     // Auto-scroll to bottom

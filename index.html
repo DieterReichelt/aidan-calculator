@@ -1013,8 +1013,9 @@
     function keypadTypeFinance(key) {
       if (key === 'AC') {
         document.getElementById('fin-p').value = ""; document.getElementById('fin-r').value = ""; document.getElementById('fin-t').value = "";
-        document.getElementById('finance-res').textContent = "$0.00"; return;
-        updateCurrencySymbol(); // Update placeholder after clearing
+        document.getElementById('finance-res').textContent = "$0.00";
+        updateCurrencySymbol();
+        return;
       }
       if (!activeFinanceInput) activeFinanceInput = document.getElementById('fin-p');
       if (key === 'B') activeFinanceInput.value = activeFinanceInput.value.slice(0, -1);

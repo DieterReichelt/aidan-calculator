@@ -1,11 +1,14 @@
+import { CONFIG } from '../config.js';
+
 export class MathEngine {
-  static #angleMode = 'deg';
+  static #angleMode = localStorage.getItem(CONFIG.STORAGE_KEYS.ANGLE_MODE) || 'deg';
 
   static setAngleMode(mode) {
     if (!['deg', 'rad'].includes(mode)) {
       throw new Error('Invalid angle mode');
     }
     this.#angleMode = mode;
+    localStorage.setItem(CONFIG.STORAGE_KEYS.ANGLE_MODE, mode);
   }
 
   static getAngleMode() {

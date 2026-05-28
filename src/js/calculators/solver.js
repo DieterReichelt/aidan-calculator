@@ -1,3 +1,5 @@
+import { Sanitizer } from '../utils/sanitizer.js';
+
 export class SolverCalculator {
   constructor() {
     this.linA = document.getElementById('solve-lin-a');
@@ -27,9 +29,11 @@ export class SolverCalculator {
     if (this.resEl) this.resEl.textContent = "x = " + parseFloat(x.toFixed(4));
     
     if (this.lessonEl) {
-      this.lessonEl.innerHTML = `<div class="lesson-title">Solving ${a}x + ${b} = ${c}</div>
+      this.lessonEl.innerHTML = Sanitizer.sanitizeHTML(
+        `<div class="lesson-title">Solving ${a}x + ${b} = ${c}</div>
         1. Subtract ${b} from both sides: ${a}x = ${c - b}<br>
-        2. Divide both sides by ${a}: x = ${x.toFixed(4)}`;
+        2. Divide both sides by ${a}: x = ${x.toFixed(4)}`
+      );
       this.lessonEl.classList.add('visible');
     }
   }
@@ -49,19 +53,23 @@ export class SolverCalculator {
     if (disc < 0) {
       if (this.resEl) this.resEl.textContent = "No Real Roots (D < 0)";
       if (this.lessonEl) {
-        this.lessonEl.innerHTML = `<div class="lesson-title">Quadratic Formula</div>Discriminant D = ${disc}. Since D is negative, there are no real solutions.`;
+        this.lessonEl.innerHTML = Sanitizer.sanitizeHTML(
+          `<div class="lesson-title">Quadratic Formula</div>Discriminant D = ${disc}. Since D is negative, there are no real solutions.`
+        );
         this.lessonEl.classList.add('visible');
       }
     } else {
       const x1 = (-b + Math.sqrt(disc)) / (2 * a);
       const x2 = (-b - Math.sqrt(disc)) / (2 * a);
       if (this.resEl) this.resEl.textContent = `x1 = ${x1.toFixed(2)}, x2 = ${x2.toFixed(2)}`;
-      
+
       if (this.lessonEl) {
-        this.lessonEl.innerHTML = `<div class="lesson-title">Quadratic Formula</div>
+        this.lessonEl.innerHTML = Sanitizer.sanitizeHTML(
+          `<div class="lesson-title">Quadratic Formula</div>
           1. D = b² - 4ac = ${disc}<br>
           2. x = (-b ± √D) / 2a<br>
-          3. x = (${-b} ± ${Math.sqrt(disc).toFixed(2)}) / ${2 * a}`;
+          3. x = (${-b} ± ${Math.sqrt(disc).toFixed(2)}) / ${2 * a}`
+        );
         this.lessonEl.classList.add('visible');
       }
     }

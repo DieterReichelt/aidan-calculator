@@ -138,8 +138,8 @@ set_permissions() {
     fi
     
     chown -R "$WEB_USER:$WEB_USER" "$WEB_ROOT" || error "Failed to set ownership"
-    chmod -R 755 "$WEB_ROOT" || error "Failed to set directory permissions"
-    chmod -R 644 "$WEB_ROOT"/* || error "Failed to set file permissions"
+    find "$WEB_ROOT" -type d -exec chmod 755 {} \; || error "Failed to set directory permissions"
+    find "$WEB_ROOT" -type f -exec chmod 644 {} \; || error "Failed to set file permissions"
     
     log "✓ Permissions set (owner: $WEB_USER)"
 }

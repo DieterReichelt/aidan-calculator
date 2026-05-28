@@ -2,20 +2,18 @@
 
 ################################################################################
 # Aidan's Math Notebook - Deployment Script
-# Purpose: Deploy from GitHub to production LXC Proxmox server
+# Purpose: Deploy from Gitea to production server
 # Usage: ./deploy.sh
 ################################################################################
 
 set -e  # Exit on error
 
 # Configuration
-# Use SSH URL for secure GitHub access (recommended for production)
-# Ensure SSH key is configured: ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_git
-REPO_URL="${REPO_URL:-git@github.com:DieterReichelt/Aidan-Calculator.git}"
-REPO_DIR="${REPO_DIR:-/opt/aidans-calculator}"
+REPO_URL="${REPO_URL:-gitea@gitea.reichelt.org.za:Dieter/aidan-calculator.git}"
+REPO_DIR="${REPO_DIR:-/opt/aidan-calculator}"
 BUILD_DIR="${REPO_DIR}/dist"
-WEB_ROOT="${WEB_ROOT:-/var/www/aidans-calculator}"
-LOG_FILE="/var/log/aidans-calculator-deploy.log"
+WEB_ROOT="${WEB_ROOT:-/var/www/aidan-calculator}"
+LOG_FILE="/var/log/aidan-calculator-deploy.log"
 BRANCH="${BRANCH:-main}"
 
 # Color codes for output
@@ -56,7 +54,7 @@ check_requirements() {
     if [[ "$REPO_URL" =~ ^git@ ]]; then
         # Extract host from REPO_URL (e.g., github.com or your Gitea IP)
         local git_host=$(echo "$REPO_URL" | sed -e 's/git@//' -e 's/:.*//')
-        local identity_file="$HOME/.ssh/id_ed25519_git"
+        local identity_file="$HOME/.ssh/id_ed25519_gitea"
         
         log "Checking SSH access to $git_host..."
         

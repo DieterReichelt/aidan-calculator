@@ -50,6 +50,13 @@ document.addEventListener('DOMContentLoaded', () => {
   window.backspace = () => sciCalc.backspace();
   window.calculateSci = () => sciCalc.calculate();
   window.clearSciHistory = () => sciCalc.clearHistory();
+  window.calcSci = (f) => sciCalc.calcFunction(f);
+  window.toggleAngleMode = () => sciCalc.toggleAngleMode();
+  window.memoryAdd = () => sciCalc.memoryAdd();
+  window.memorySubtract = () => sciCalc.memorySubtract();
+  window.memoryRecall = () => sciCalc.memoryRecall();
+  window.memoryClear = () => sciCalc.memoryClear();
+  window.saveHistoryPDF = () => sciCalc.saveHistoryPDF();
   
   // Advanced Parser handlers
   window.insertAdv = (c) => advCalc.insertChar(c);

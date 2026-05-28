@@ -856,6 +856,7 @@
 
   </div>
 
+  <script type="module" src="/src/js/main.js"></script>
   <script>
     function switchTab(name) {
       // Stop any running animations or timers from the advanced parser when switching tabs
@@ -923,139 +924,6 @@
       if (!activeInput) activeInput = document.getElementById('cm-n1');
       if (key === 'B') activeInput.value = activeInput.value.slice(0, -1);
       else if (key !== 'AC') activeInput.value += key;
-    }
-
-    // --- SCIENTIFIC LOGIC ---
-    let sciExpr = ""; let angleMode = "deg";
-    let sciMemory = 0;
-    let sciAns = 0;
-    // Initialize history from localStorage safely
-    let sciHistoryRaw = localStorage.getItem('sciHistory');
-    let sciHistory = [];
-    try {
-      sciHistory = JSON.parse(sciHistoryRaw);
-      if (!Array.isArray(sciHistory)) sciHistory = [];
-    } catch(e) { sciHistory = []; }
-
-    window.addEventListener('load', updateSciHistory);
-
-    function insertChar(c) { sciExpr += c; updateSciDisplay(); }
-    function insertConst(n) { const m={'pi':'Math.PI','e':'Math.E','tau':'(Math.PI * 2)','phi':'((1 + Math.sqrt(5)) / 2)'}; sciExpr += m[n]; updateSciDisplay(); }
-    function insertAns() { sciExpr += String(sciAns); updateSciDisplay(); }
-    function updateSciDisplay() { 
-      document.getElementById('sci-expr').textContent = sciExpr.replace(/Math\.PI/g,'π').replace(/Math\.E/g,'e').replace(/\*\*/g,'^'); 
-      let last = sciExpr.split(/[\+\-\*\/\(]/).pop();
-      document.getElementById('sci-res').textContent = (last && !isNaN(last)) ? last : "0";
-    }
-    function clearSci() { sciExpr = ""; updateSciDisplay(); document.getElementById('sci-res').textContent = "0"; }
-    function backspace() { sciExpr = sciExpr.slice(0,-1); updateSciDisplay(); }
-    function toggleAngleMode() { angleMode = (angleMode==='deg'?'rad':'deg'); document.getElementById('angle-mode-btn').textContent = angleMode.toUpperCase(); }
-    function formatParserError(err) {
-      const msg = err && err.message ? err.message : "";
-      if (!msg) return "Error";
-      if (msg.length > 28) return msg.slice(0, 28) + "...";
-      return msg;
-    }
-    function getSciCurrentValue() {
-      const cur = parseFloat(document.getElementById('sci-res').textContent);
-      if (!isFinite(cur)) throw new Error("No valid current value");
-      return cur;
-    }
-    function memoryAdd() {
-      try {
-        sciMemory += getSciCurrentValue();
-        document.getElementById('sci-expr').textContent = `Memory: ${parseFloat(sciMemory.toFixed(10))}`;
-      } catch(e) { document.getElementById('sci-res').textContent = formatParserError(e); }
-    }
-    function memorySubtract() {
-      try {
-        sciMemory -= getSciCurrentValue();
-        document.getElementById('sci-expr').textContent = `Memory: ${parseFloat(sciMemory.toFixed(10))}`;
-      } catch(e) { document.getElementById('sci-res').textContent = formatParserError(e); }
-    }
-    function memoryRecall() { sciExpr += String(parseFloat(sciMemory.toFixed(10))); updateSciDisplay(); }
-    function memoryClear() {
-      sciMemory = 0;
-      document.getElementById('sci-expr').textContent = "Memory cleared";
-    }
-
-    function calculateSci() {
-      if (sciExpr === "") return;
-      try {
-        const normalized = sciExpr
-          .replace(/Math\.PI/g, 'pi')
-          .replace(/Math\.E/g, 'e')
-          .replace(/\*\*/g, '^');
-        const tokens = tokenize(normalized);
-        const postfix = shuntingYard(tokens);
-        let res = evaluateRPN(postfix);
-        if(!isFinite(res)) throw "err";
-        res = parseFloat(res.toFixed(10));
-        sciAns = res;
-        let niceExpr = sciExpr.replace(/Math\.PI/g,'π').replace(/Math\.E/g,'e').replace(/\*\*/g,'^');
-        addSciHistory(niceExpr, res);
-        document.getElementById('sci-res').textContent = res;
-        document.getElementById('sci-expr').textContent = niceExpr + " =";
-        sciExpr = String(res);
-      } catch(e) { document.getElementById('sci-res').textContent = formatParserError(e); }
-    }
-
-    function calcSci(f) {
-      let cur = parseFloat(document.getElementById('sci-res').textContent);
-      if(isNaN(cur)) return;
-      let res, label;
-      switch(f) {
-        case 'sin': res = (angleMode==='deg'?Math.sin(cur*Math.PI/180):Math.sin(cur)); label=`sin(${cur})`; break;
-        case 'cos': res = (angleMode==='deg'?Math.cos(cur*Math.PI/180):Math.cos(cur)); label=`cos(${cur})`; break;
-        case 'tan': res = (angleMode==='deg'?Math.tan(cur*Math.PI/180):Math.tan(cur)); label=`tan(${cur})`; break;
-        case 'sqrt':
-          if (cur < 0) throw new Error("sqrt needs non-negative");
-          res = Math.sqrt(cur); label=`√(${cur})`; break;
-        case 'log':
-          if (cur <= 0) throw new Error("log needs value > 0");
-          res = Math.log10(cur); label=`log(${cur})`; break;
-        case 'ln':
-          if (cur <= 0) throw new Error("ln needs value > 0");
-          res = Math.log(cur); label=`ln(${cur})`; break;
-        case 'sq': res = cur*cur; label=`${cur}²`; break;
-        case 'inv':
-          if (cur === 0) throw new Error("Cannot divide by 0");
-          res = 1/cur; label=`1/${cur}`; break;
-        case 'abs': res = Math.abs(cur); label=`|${cur}|`; break;
-        case 'fact':
-          if (cur < 0 || !Number.isInteger(cur)) throw new Error("Factorial needs integer >= 0");
-          res=1; for(let i=2;i<=cur;i++) res*=i; label=`${cur}!`; break;
-        case 'prime': let p=cur>1; for(let i=2;i*i<=cur;i++) if(cur%i===0) p=false; document.getElementById('sci-res').textContent = p?"PRIME":"NOT PRIME"; return;
-      }
-      res = parseFloat(res.toFixed(10)); addSciHistory(label, res);
-      sciAns = res;
-      document.getElementById('sci-res').textContent = res; sciExpr = String(res);
-    }
-
-    function addSciHistory(e, r) { 
-      sciHistory.unshift({e, r}); 
-      if(sciHistory.length>5) sciHistory.pop(); 
-      localStorage.setItem('sciHistory', JSON.stringify(sciHistory)); 
-      updateSciHistory(); 
-    }
-    function updateSciHistory() { document.getElementById('sci-history').innerHTML = sciHistory.map(i => `<div class="history-item">${i.e} = <strong>${i.r}</strong></div>`).join(''); }
-
-    function clearSciHistory() {
-      if (confirm("Clear all calculation history?")) {
-        sciHistory = [];
-        localStorage.removeItem('sciHistory');
-        updateSciHistory();
-      }
-    }
-
-    function saveHistoryPDF() {
-      if (sciHistory.length === 0) {
-        alert("History is empty!");
-        return;
-      }
-      document.body.classList.add('print-history-only');
-      window.print();
-      document.body.classList.remove('print-history-only');
     }
 
     // --- FRACTION LOGIC ---

@@ -1,5 +1,6 @@
 import { Parser } from '../core/parser.js';
 import { Evaluator } from '../core/evaluator.js';
+import { MathEngine } from '../core/math-engine.js';
 import { StorageManager } from '../utils/storage.js';
 import { ErrorHandler } from '../utils/errors.js';
 import { CONFIG } from '../config.js';
@@ -109,5 +110,85 @@ export class ScientificCalculator {
     this.history = [];
     StorageManager.removeItem(CONFIG.STORAGE_KEYS.HISTORY);
     this.updateHistoryUI();
+  }
+
+  calcFunction(f) {
+    const cur = parseFloat(this.resEl?.textContent);
+    if (isNaN(cur)) return;
+    let res, label;
+    try {
+      switch (f) {
+        case 'sin':  res = MathEngine.sin(cur);  label = `sin(${cur})`; break;
+        case 'cos':  res = MathEngine.cos(cur);  label = `cos(${cur})`; break;
+        case 'tan':  res = MathEngine.tan(cur);  label = `tan(${cur})`; break;
+        case 'sqrt':
+          if (cur < 0) throw new Error('sqrt needs non-negative');
+          res = Math.sqrt(cur); label = `√(${cur})`; break;
+        case 'log':
+          if (cur <= 0) throw new Error('log needs value > 0');
+          res = Math.log10(cur); label = `log(${cur})`; break;
+        case 'ln':
+          if (cur <= 0) throw new Error('ln needs value > 0');
+          res = Math.log(cur); label = `ln(${cur})`; break;
+        case 'sq':   res = cur * cur;             label = `${cur}²`; break;
+        case 'inv':
+          if (cur === 0) throw new Error('Cannot divide by 0');
+          res = 1 / cur; label = `1/${cur}`; break;
+        case 'abs':  res = Math.abs(cur);         label = `|${cur}|`; break;
+        case 'fact':
+          res = MathEngine.factorial(cur); label = `${cur}!`; break;
+        case 'prime': {
+          const isPrime = MathEngine.isPrime(cur);
+          if (this.resEl) this.resEl.textContent = isPrime ? 'PRIME' : 'NOT PRIME';
+          return;
+        }
+        default: return;
+      }
+      res = parseFloat(res.toFixed(CONFIG.DISPLAY.DECIMAL_PLACES));
+      this.ans = res;
+      this.expr = String(res);
+      if (this.resEl) this.resEl.textContent = res;
+      this.addHistory(label, res);
+    } catch (e) {
+      if (this.resEl) this.resEl.textContent = ErrorHandler.handle(e, 'ScientificCalculator');
+    }
+  }
+
+  toggleAngleMode() {
+    const newMode = MathEngine.getAngleMode() === 'deg' ? 'rad' : 'deg';
+    MathEngine.setAngleMode(newMode);
+    const btn = document.getElementById('angle-mode-btn');
+    if (btn) btn.textContent = newMode.toUpperCase();
+  }
+
+  memoryAdd() {
+    const cur = parseFloat(this.resEl?.textContent);
+    if (!isFinite(cur)) return;
+    this.memory += cur;
+    if (this.exprEl) this.exprEl.textContent = `Memory: ${parseFloat(this.memory.toFixed(10))}`;
+  }
+
+  memorySubtract() {
+    const cur = parseFloat(this.resEl?.textContent);
+    if (!isFinite(cur)) return;
+    this.memory -= cur;
+    if (this.exprEl) this.exprEl.textContent = `Memory: ${parseFloat(this.memory.toFixed(10))}`;
+  }
+
+  memoryRecall() {
+    this.expr += String(parseFloat(this.memory.toFixed(10)));
+    this.updateDisplay();
+  }
+
+  memoryClear() {
+    this.memory = 0;
+    if (this.exprEl) this.exprEl.textContent = 'Memory cleared';
+  }
+
+  saveHistoryPDF() {
+    if (this.history.length === 0) { alert('History is empty!'); return; }
+    document.body.classList.add('print-history-only');
+    window.print();
+    document.body.classList.remove('print-history-only');
   }
 }

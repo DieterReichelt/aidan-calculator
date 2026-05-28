@@ -12,6 +12,10 @@ import { PowersCalculator } from './calculators/powers.js';
 import { GeometryCalculator } from './calculators/geometry.js';
 import { FactorsCalculator } from './calculators/factors.js';
 import { StatisticsCalculator } from './calculators/statistics.js';
+import { MatrixCalculator } from './calculators/matrix.js';
+import { FinanceCalculator } from './calculators/finance.js';
+import { BytesCalculator } from './calculators/bytes.js';
+import { SubnetCalculator } from './calculators/subnet.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   ThemeManager.init();
@@ -29,6 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const geomCalc = new GeometryCalculator();
   const factorsCalc = new FactorsCalculator();
   const statsCalc = new StatisticsCalculator();
+  const matrixCalc = new MatrixCalculator();
+  const financeCalc = new FinanceCalculator();
+  const bytesCalc = new BytesCalculator();
+  const subnetCalc = new SubnetCalculator();
 
   // Expose to global scope for HTML onclick handlers
   window.switchTab = TabManager.switchTab;
@@ -101,4 +109,25 @@ document.addEventListener('DOMContentLoaded', () => {
   window.keypadTypeStats = (key) => statsCalc.keypadType(key);
   window.calcStats = () => statsCalc.calculate();
   window.saveStatsPDF = () => statsCalc.savePDF();
+
+  // Matrix handlers
+  window.setActiveMatrix = (el) => matrixCalc.setActiveInput(el);
+  window.keypadTypeMatrix = (key) => matrixCalc.keypadType(key);
+  window.calcMatrix = () => matrixCalc.calculate();
+
+  // Finance handlers
+  window.setActiveFinance = (el) => financeCalc.setActiveInput(el);
+  window.keypadTypeFinance = (key) => financeCalc.keypadType(key);
+  window.calcFinance = () => financeCalc.calculate();
+  window.updateCurrencySymbol = () => financeCalc.updateCurrencySymbol();
+
+  // Bytes handlers
+  window.setActiveByteInput = (el) => bytesCalc.setActiveInput(el);
+  window.keypadTypeBytes = (key) => bytesCalc.keypadType(key);
+  window.syncBytes = (unit) => bytesCalc.sync(unit);
+
+  // Subnet handlers
+  window.setActiveSubnetInput = (el) => subnetCalc.setActiveInput(el);
+  window.keypadTypeSubnet = (key) => subnetCalc.keypadType(key);
+  window.calcSubnet = (source) => subnetCalc.calculate(source);
 });

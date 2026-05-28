@@ -13,18 +13,18 @@ export class SubnetCalculator {
     this.activeInput = el;
   }
 
-  #ipToInt(ip) {
+  _ipToInt(ip) {
     const parts = ip.split('.');
     if (parts.length !== 4) return 0;
     return parts.reduce((res, octet) => (res << 8) + (parseInt(octet, 10) || 0), 0) >>> 0;
   }
 
-  #intToIp(int) {
+  _intToIp(int) {
     return [(int >>> 24) & 0xFF, (int >>> 16) & 0xFF, (int >>> 8) & 0xFF, int & 0xFF].join('.');
   }
 
-  #maskToCidr(mask) {
-    const int = this.#ipToInt(mask);
+  _maskToCidr(mask) {
+    const int = this._ipToInt(mask);
     let count = 0;
     for (let i = 31; i >= 0; i--) {
       if ((int >>> i) & 1) count++;
@@ -38,12 +38,12 @@ export class SubnetCalculator {
       const c = parseInt(this.cidrEl?.value);
       if (!isNaN(c) && c >= 0 && c <= 32) {
         const m = (c === 0) ? 0 : (~0 << (32 - c)) >>> 0;
-        if (this.maskEl) this.maskEl.value = this.#intToIp(m);
+        if (this.maskEl) this.maskEl.value = this._intToIp(m);
       }
     } else if (source === 'mask') {
       const mStr = this.maskEl?.value || '';
       if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(mStr)) {
-        if (this.cidrEl) this.cidrEl.value = this.#maskToCidr(mStr);
+        if (this.cidrEl) this.cidrEl.value = this._maskToCidr(mStr);
       }
     }
 
@@ -55,18 +55,18 @@ export class SubnetCalculator {
       return;
     }
 
-    const ip = this.#ipToInt(ipStr);
+    const ip = this._ipToInt(ipStr);
     const mask = (cidr === 0) ? 0 : (~0 << (32 - cidr)) >>> 0;
     const network = (ip & mask) >>> 0;
     const broadcast = (network | ~mask) >>> 0;
     const hosts = cidr >= 31 ? 0 : Math.pow(2, 32 - cidr) - 2;
-    const toBin = (int) => (int >>> 0).toString(2).padStart(32, '0').match(/.{8}/g).join('.');
+    const toBin = (n) => (n >>> 0).toString(2).padStart(32, '0').match(/.{8}/g).join('.');
 
-    let html = `<strong>Mask:</strong> ${this.#intToIp(mask)}<br>`
-      + `<strong>Network:</strong> ${this.#intToIp(network)}/${cidr}<br>`
-      + `<strong>Broadcast:</strong> ${this.#intToIp(broadcast)}<br>`
+    let html = `<strong>Mask:</strong> ${this._intToIp(mask)}<br>`
+      + `<strong>Network:</strong> ${this._intToIp(network)}/${cidr}<br>`
+      + `<strong>Broadcast:</strong> ${this._intToIp(broadcast)}<br>`
       + `<strong>Hosts:</strong> ${hosts.toLocaleString()}<br>`;
-    if (cidr < 31) html += `<strong>Range:</strong> ${this.#intToIp(network + 1)} - ${this.#intToIp(broadcast - 1)}<br>`;
+    if (cidr < 31) html += `<strong>Range:</strong> ${this._intToIp(network + 1)} - ${this._intToIp(broadcast - 1)}<br>`;
     html += `<div style="margin-top:10px; font-size:0.7rem; color:#888;">`
       + `IP Binary:   ${toBin(ip)}<br>`
       + `Mask Binary: ${toBin(mask)}<br>`

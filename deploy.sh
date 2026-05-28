@@ -119,18 +119,8 @@ build_project() {
 
 deploy_files() {
     log "Deploying files to $WEB_ROOT..."
-    
-    # Backup current deployment (optional)
-    if [ -d "$WEB_ROOT" ] && [ "$(ls -A $WEB_ROOT)" ]; then
-        BACKUP_DIR="${WEB_ROOT}.backup.$(date +%s)"
-        log "Backing up current deployment to $BACKUP_DIR"
-        cp -r "$WEB_ROOT" "$BACKUP_DIR" || warning "Backup failed but continuing deployment"
-    fi
-    
-    # Copy build files
     rm -rf "$WEB_ROOT"/* 2>/dev/null || true
     cp -r "$BUILD_DIR"/* "$WEB_ROOT/" || error "Failed to copy build files"
-    
     log "✓ Files deployed to $WEB_ROOT"
 }
 

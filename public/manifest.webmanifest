@@ -1,0 +1,16 @@
+{
+  "name": "Aidan's Math Notebook",
+  "short_name": "Math Notebook",
+  "description": "Interactive scientific calculator, grapher, equation solver, and math tools.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#16213e",
+  "theme_color": "#1a1a2e",
+  "icons": [
+    { "src": "/icon-192.png", "type": "image/png", "sizes": "192x192", "purpose": "any" },
+    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any" },
+    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
+  ]
+}

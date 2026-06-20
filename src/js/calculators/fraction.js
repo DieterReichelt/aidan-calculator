@@ -1,6 +1,7 @@
 import { MathEngine } from '../core/math-engine.js';
 import { Sanitizer } from '../utils/sanitizer.js';
 import { ErrorHandler, CalculatorError, ERROR_CODES } from '../utils/errors.js';
+import { showToast } from '../utils/toast.js';
 
 export class FractionCalculator {
   constructor() {
@@ -81,8 +82,18 @@ export class FractionCalculator {
 
   simplifyResult() {
     if (!this.lastResult) return;
-    
-    const simplified = MathEngine.simplifyFraction(this.lastResult.res.n, this.lastResult.res.d);
+
+    const { n, d } = this.lastResult.res;
+    const simplified = MathEngine.simplifyFraction(n, d);
+
+    // Already in lowest terms — nothing to do, just tell the user.
+    if (simplified.n === n && simplified.d === d) {
+      showToast('Already simplified');
+      return;
+    }
+
+    // Store the reduced value so a second press correctly reports "already simplified".
+    this.lastResult.res = simplified;
     this._updateDisplay(this.lastResult.A, this.lastResult.B, simplified, this.lastResult.op, true);
   }
 

@@ -885,43 +885,6 @@
     }
 
 
-    // --- FRACTION KEYPAD & LIVE LOGIC ---
-    let activeFracInput = null;
-    function setActiveFrac(el) { activeFracInput = el; }
-    function keypadTypeFrac(key) {
-      if (key === 'AC') { clearFraction(); return; }
-      if (!activeFracInput) activeFracInput = document.getElementById('f-a-w');
-      if (key === 'B') activeFracInput.value = activeFracInput.value.slice(0, -1);
-      else activeFracInput.value += key;
-      liveUpdateFrac();
-    }
-
-    function liveUpdateFrac() {
-      const getV = (id) => document.getElementById(id).value;
-      const format = (w, n, d) => {
-        if(!w && !n && !d) return "";
-        return `<div style="display:inline-flex; align-items:center; margin: 0 5px;">
-          ${w ? `<span>${w}</span>` : ""}
-          ${(n || d) ? `<div style="display:flex; flex-direction:column; align-items:center; margin-left:5px;">
-            <span style="border-bottom:2px solid #333; padding:0 3px;">${n || '0'}</span>
-            <span>${d || '1'}</span>
-          </div>` : ""}
-        </div>`;
-      };
-      let opSym = fracOp === '*' ? '×' : (fracOp === '/' ? '÷' : (fracOp === '-' ? '−' : '+'));
-      let visualA = format(getV('f-a-w'), getV('f-a-n'), getV('f-a-d'));
-      let visualB = format(getV('f-b-w'), getV('f-b-n'), getV('f-b-d'));
-      
-      if (!visualA && !visualB) {
-        document.getElementById('frac-visual-res').innerHTML = "Enter Fractions Below";
-      } else {
-        document.getElementById('frac-visual-res').innerHTML = `
-          <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
-            ${visualA || "?"} <span style="color:#666">${opSym}</span> ${visualB || "?"}
-          </div>`;
-      }
-    }
-
     // --- COLUMN MATH KEYPAD LOGIC ---
     let activeInput = null;
     function setActiveInput(el) { activeInput = el; }
@@ -936,59 +899,6 @@
       if (key === 'B') activeInput.value = activeInput.value.slice(0, -1);
       else if (key !== 'AC') activeInput.value += key;
     }
-
-    // --- FRACTION LOGIC ---
-    let fracOp = '+';
-    function setFracOp(op) { fracOp = op; liveUpdateFrac(); }
-    function gcd(a, b) { a=Math.abs(a); b=Math.abs(b); while(b){let t=b; b=a%b; a=t;} return a; }
-    function simplify(n, d) {
-      if (d === 0) return { n: NaN, d: NaN };
-      let g=gcd(n,d);
-      if(d<0){n=-n; d=-d;}
-      return { n: n/g, d: d/g };
-    }
-    function getF(p) {
-      const w = parseInt(document.getElementById(`f-${p}-w`).value) || 0;
-      const n = parseInt(document.getElementById(`f-${p}-n`).value) || 0;
-      const dRaw = document.getElementById(`f-${p}-d`).value;
-      const d = dRaw === "" ? 1 : parseInt(dRaw);
-      if (!isFinite(d) || d === 0) return null;
-      return simplify(Math.abs(w)*d + n * (w<0?-1:1), d);
-    }
-    function calcFraction() {
-      let A=getF('a'), B=getF('b'), rn, rd;
-      const lesson = document.getElementById('frac-lesson');
-      if (!A || !B) {
-        document.getElementById('frac-dec-res').textContent = "";
-        document.getElementById('frac-visual-res').textContent = "Error: denominator cannot be 0";
-        lesson.innerHTML = "<div class='lesson-title'>Step-by-Step</div>Please use non-zero denominators.";
-        lesson.classList.add('visible');
-        return;
-      }
-      if(fracOp==='+'){rn=A.n*B.d+B.n*A.d; rd=A.d*B.d;}
-      else if(fracOp==='-'){rn=A.n*B.d-B.n*A.d; rd=A.d*B.d;}
-      else if(fracOp==='*'){rn=A.n*B.n; rd=A.d*B.d;}
-      else {rn=A.n*B.d; rd=A.d*B.n;}
-      if (rd === 0) {
-        document.getElementById('frac-dec-res').textContent = "";
-        document.getElementById('frac-visual-res').textContent = "Error: division by zero";
-        lesson.innerHTML = "<div class='lesson-title'>Step-by-Step</div>Cannot divide by a fraction equal to 0.";
-        lesson.classList.add('visible');
-        return;
-      }
-      let res = simplify(rn, rd);
-      const formatVisual = (f) => {
-        let w=Math.trunc(f.n/f.d), n=Math.abs(f.n%f.d);
-        return `<div style="display:inline-flex; align-items:center;">${w?`<span>${w}</span>`:(n?'':'<span>0</span>')}${n?`<div style="display:flex; flex-direction:column; align-items:center; margin-left:5px;"><span style="border-bottom:2px solid #333; padding:0 3px;">${n}</span><span>${f.d}</span></div>`:''}</div>`;
-      };
-      let opSym = fracOp === '*' ? '×' : (fracOp === '/' ? '÷' : (fracOp === '-' ? '−' : '+'));
-      document.getElementById('frac-visual-res').innerHTML = `<div style="display:flex; align-items:center; justify-content:center; gap:15px; flex-wrap:wrap;">${formatVisual(A)} <span style="font-size:1.5rem; color:#555;">${opSym}</span> ${formatVisual(B)} <span style="font-size:1.5rem; color:#b22222;">=</span> <div style="color:#b22222;">${formatVisual(res)}</div></div>`;
-      document.getElementById('frac-dec-res').textContent = `≈ ${(res.n/res.d).toFixed(6)}`;
-      lesson.innerHTML = `<div class='lesson-title'>Step-by-Step</div><strong>Simplified Result: ${res.n}/${res.d}</strong>`;
-      lesson.classList.add('visible');
-    }
-    function swapFractions() { ['w','n','d'].forEach(s=>{ let a=document.getElementById('f-a-'+s), b=document.getElementById('f-b-'+s), t=a.value; a.value=b.value; b.value=t; }); liveUpdateFrac(); }
-    function clearFraction() { ['f-a-w','f-a-n','f-a-d','f-b-w','f-b-n','f-b-d'].forEach(id => document.getElementById(id).value = ''); document.getElementById('frac-visual-res').innerHTML = 'Enter Fractions Below'; document.getElementById('frac-dec-res').textContent = ''; const lesson = document.getElementById('frac-lesson'); lesson.innerHTML = ''; lesson.classList.remove('visible'); }
 
     // --- COLUMN MATH LOGIC ---
     function addC(g,r,c,v,cls) { const el=document.createElement('div'); el.className='cell '+(cls||''); el.style.gridRow=r+1; el.style.gridColumn=c+1; el.textContent=v; g.appendChild(el); }

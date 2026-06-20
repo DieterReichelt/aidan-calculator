@@ -93,6 +93,15 @@
       background-repeat: no-repeat; background-position: right 15px center;
     }
     .tab-select:focus { border-color: #a0c4ff; }
+    /* Style the dropdown OPTION list (native popup on mobile): the closed
+       control stays dark/blue, but options need explicit high-contrast colors
+       or they inherit light-blue text onto the native white list = unreadable. */
+    .tab-select option {
+      background: #ffffff;
+      color: #16213e;
+      font-size: 1rem;
+      font-weight: 600;
+    }
 
     /* ---- MAIN CALCULATOR BOX ---- */
     .calculator {

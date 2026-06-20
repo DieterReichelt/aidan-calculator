@@ -91,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.calcFraction = () => fracCalc.calculate();
   window.swapFractions = () => fracCalc.swap();
   window.clearFraction = () => fracCalc.clear();
+  window.simplifyFraction = () => fracCalc.simplifyResult();
   
   // Column Math handlers
   window.setActiveInput = (el) => columnCalc.setActiveInput(el);

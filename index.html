@@ -283,7 +283,7 @@
         visibility: visible !important; 
         display: block !important; 
       }
-      body.print-stats-only .stats-export-area { 
+      body.print-stats-only .stats-export-area {
         display: flex !important;
         position: fixed !important;
         top: 0; left: 0; width: 100%; height: 100%;
@@ -291,6 +291,20 @@
         z-index: 99999;
         padding: 40px !important;
         max-height: none !important;
+      }
+
+      /* BMI PDF Export */
+      body.print-bmi-only * { visibility: hidden !important; }
+      body.print-bmi-only .bmi-export-area,
+      body.print-bmi-only .bmi-export-area * { visibility: visible !important; }
+      body.print-bmi-only .bmi-export-area {
+        position: fixed !important;
+        top: 0; left: 0; width: 100%;
+        background: white !important;
+        z-index: 99999;
+        padding: 48px 40px !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
       }
     }
   </style>
@@ -351,7 +365,12 @@
           <input class="ld-input" type="number" inputmode="decimal" id="bmi-height-in" oninput="calcBmi()" style="width: 100%; color: #fff;">
         </div>
         <button onclick="calcBmi()" style="width:100%; margin-top:4px; padding:10px; border:none; border-radius:10px; background:var(--btn-op-bg,#1a3a5c); color:var(--btn-op-text,#7ec8e3); font-weight:700; font-size:0.9rem; cursor:pointer;">Calculate BMI</button>
-        <div id="bmi-result" style="margin-top:14px;"></div>
+        <div id="bmi-result" class="bmi-export-area" style="margin-top:14px;"></div>
+        <div id="bmi-actions" style="display:none; gap:8px; margin-top:12px;">
+          <button onclick="saveBmiReading()" style="flex:1; padding:9px; border:1px solid var(--border-color,#2a2a4a); border-radius:9px; background:transparent; color:#7edca0; font-weight:600; font-size:0.8rem; cursor:pointer;">📈 Save reading</button>
+          <button onclick="printBmi()" style="flex:1; padding:9px; border:1px solid var(--border-color,#2a2a4a); border-radius:9px; background:transparent; color:#7ec8e3; font-weight:600; font-size:0.8rem; cursor:pointer;">🖨️ Save PDF</button>
+        </div>
+        <div id="bmi-history" style="margin-top:14px;"></div>
       </div>
     </div>
 

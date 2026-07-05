@@ -144,6 +144,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // BMI handlers
   window.calcBmi = () => bmiCalc.calculate();
   window.bmiSetSystem = (s) => bmiCalc.setSystem(s);
+  window.saveBmiReading = () => bmiCalc.saveReading();
+  window.clearBmiHistory = () => bmiCalc.clearHistory();
+  window.printBmi = () => bmiCalc.print();
 });
 
 // PWA: register the service worker so the app installs and works offline (prod only).

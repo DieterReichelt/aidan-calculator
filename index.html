@@ -323,6 +323,7 @@
       <option value="finance">💰 Financial Math</option>
       <option value="bytes">💾 Byte Converter</option>
       <option value="subnet">🌐 Subnet Calculator</option>
+      <option value="bmi">🧍 BMI Calculator</option>
     </select>
   </div>
 
@@ -330,6 +331,30 @@
 
     <!-- SCIENTIFIC PANEL -->
 ...
+    <!-- BMI PANEL -->
+    <div class="panel" id="panel-bmi">
+      <div style="background: rgba(0,0,0,0.05); padding: 15px; border-radius: 12px;">
+        <div style="display:flex; gap:8px; margin-bottom:14px;">
+          <button id="bmi-metric-btn" onclick="bmiSetSystem('metric')" style="flex:1; padding:8px; border:1px solid var(--border-color,#2a2a4a); border-radius:8px; background:transparent; cursor:pointer; font-size:0.8rem;">Metric (kg / cm)</button>
+          <button id="bmi-imperial-btn" onclick="bmiSetSystem('imperial')" style="flex:1; padding:8px; border:1px solid var(--border-color,#2a2a4a); border-radius:8px; background:transparent; cursor:pointer; font-size:0.8rem;">Imperial (lb / ft)</button>
+        </div>
+        <div style="margin-bottom:10px;">
+          <div style="font-size: 0.7rem; color: #888; text-transform: uppercase; margin-bottom: 4px;">Weight (<span id="bmi-weight-unit">kg</span>)</div>
+          <input class="ld-input" type="number" inputmode="decimal" id="bmi-weight" oninput="calcBmi()" style="width: 100%; color: #fff;">
+        </div>
+        <div style="margin-bottom:10px;">
+          <div style="font-size: 0.7rem; color: #888; text-transform: uppercase; margin-bottom: 4px;">Height (<span id="bmi-height-unit">cm</span>)</div>
+          <input class="ld-input" type="number" inputmode="decimal" id="bmi-height" oninput="calcBmi()" style="width: 100%; color: #fff;">
+        </div>
+        <div id="bmi-in-wrap" style="margin-bottom:10px; display:none;">
+          <div style="font-size: 0.7rem; color: #888; text-transform: uppercase; margin-bottom: 4px;">Inches (in)</div>
+          <input class="ld-input" type="number" inputmode="decimal" id="bmi-height-in" oninput="calcBmi()" style="width: 100%; color: #fff;">
+        </div>
+        <button onclick="calcBmi()" style="width:100%; margin-top:4px; padding:10px; border:none; border-radius:10px; background:var(--btn-op-bg,#1a3a5c); color:var(--btn-op-text,#7ec8e3); font-weight:700; font-size:0.9rem; cursor:pointer;">Calculate BMI</button>
+        <div id="bmi-result" style="margin-top:14px;"></div>
+      </div>
+    </div>
+
     <!-- TRIGONOMETRY PANEL -->
     <div class="panel" id="panel-trig">
       <div class="display" style="justify-content: flex-start; text-align: center; min-height: 280px; padding: 15px;">

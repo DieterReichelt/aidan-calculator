@@ -16,6 +16,7 @@ import { MatrixCalculator } from './calculators/matrix.js';
 import { FinanceCalculator } from './calculators/finance.js';
 import { BytesCalculator } from './calculators/bytes.js';
 import { SubnetCalculator } from './calculators/subnet.js';
+import { BmiCalculator } from './calculators/bmi.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   ThemeManager.init();
@@ -37,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const financeCalc = new FinanceCalculator();
   const bytesCalc = new BytesCalculator();
   const subnetCalc = new SubnetCalculator();
+  const bmiCalc = new BmiCalculator();
 
   // Expose to global scope for HTML onclick handlers
   window.switchTab = TabManager.switchTab;
@@ -138,6 +140,10 @@ document.addEventListener('DOMContentLoaded', () => {
   window.setActiveSubnetInput = (el) => subnetCalc.setActiveInput(el);
   window.keypadTypeSubnet = (key) => subnetCalc.keypadType(key);
   window.calcSubnet = (source) => subnetCalc.calculate(source);
+
+  // BMI handlers
+  window.calcBmi = () => bmiCalc.calculate();
+  window.bmiSetSystem = (s) => bmiCalc.setSystem(s);
 });
 
 // PWA: register the service worker so the app installs and works offline (prod only).

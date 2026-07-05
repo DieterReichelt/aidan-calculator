@@ -3,7 +3,7 @@
 // serve assets cache-first; navigations are network-first so a new deploy is
 // picked up immediately when online (cache is the offline fallback).
 // Bump CACHE when the shell changes to drop old entries.
-const CACHE = 'aidan-calc-v1';
+const CACHE = 'aidan-calc-v2';
 const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png'];
 
 self.addEventListener('install', (event) => {
@@ -30,7 +30,7 @@ self.addEventListener('fetch', (event) => {
   // Navigations: network-first so a new deploy is picked up immediately when online.
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request)
+      fetch(request, { cache: 'no-store' })
         .then((res) => {
           const copy = res.clone();
           caches.open(CACHE).then((c) => c.put('/index.html', copy));
